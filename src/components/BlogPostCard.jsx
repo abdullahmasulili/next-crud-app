@@ -1,5 +1,6 @@
-import { ButtonGroup, Card, CardBody, CardHeader, Flex, Heading, IconButton, Text } from '@chakra-ui/react'
-import { EditIcon, ViewIcon } from '@chakra-ui/icons'
+import { ButtonGroup, Card, CardBody, CardHeader, Flex, Heading } from '@chakra-ui/react'
+import EditPost from './modal/EditPost'
+import PostDetail from './modal/PostDetail'
 
 export default function BlogPostCard({ post }) {
   return (
@@ -9,8 +10,8 @@ export default function BlogPostCard({ post }) {
                 <Flex justifyContent='space-between' alignItems='center' gap='5'>
                     <Heading size='sm' fontWeight='500' textTransform='capitalize'>{ post.title }</Heading>
                     <ButtonGroup variant='outline' spacing='2' size='sm'>
-                        <IconButton size='md' icon={<ViewIcon/>}/>
-                        <IconButton size='md' icon={<EditIcon/>}/>
+                        <PostDetail post={ post }/>
+                        <EditPost post={ post }/>
                     </ButtonGroup>
                 </Flex>
             </CardHeader>

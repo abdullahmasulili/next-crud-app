@@ -1,67 +1,55 @@
-import { createPost } from "@/pages/api/posts";
-import {
-    Button,
-    Flex,
-    FormControl,
-    FormErrorMessage,
-    FormLabel,
-    Input,
-    Modal,
-    ModalBody,
-    ModalContent,
-    ModalFooter,
-    ModalHeader,
-    ModalOverlay,
-    Stack,
-    Textarea,
-    useDisclosure,
-} from "@chakra-ui/react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import { MdClose, MdOutlinePlaylistAdd, MdOutlineSave } from 'react-icons/md'
+import { Button, Flex, FormControl, FormErrorMessage, FormLabel, IconButton, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Stack, Textarea, useDisclosure } from "@chakra-ui/react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { MdClose, MdEditNote, MdOutlineSave } from "react-icons/md"
+import { editPost } from '@/pages/api/posts'
+import { useForm } from "react-hook-form"
 
-export default function CreatePost() {
+export default function EditPost({ post }) {
     const queryClient = useQueryClient()
     const { isOpen, onOpen, onClose } = useDisclosure()
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
         defaultValues: {
-            title: '',
-            body: ''
+            title: post.title,
+            body: post.body
         }
     })
-    const createPostMutation = useMutation({
-        mutationFn: createPost,
-        onMutate: async () => {
-            await queryClient.cancelQueries(['posts'])
-        },
+    const editPostMutation = useMutation({
+        mutationFn: editPost,
         onSuccess: (data) => {
-            const oldData = queryClient.getQueryData(['posts'])
-            const newData = [...oldData, data]
+            queryClient.setQueryData(['posts'], (prevData) => {
+                const updateData = prevData.map(post => {
+                    if(post.id === data.id) {
+                        return data
+                    } else {
+                        return post
+                    }
+                })
+
+                return updateData
+            })
             
-            queryClient.setQueryData(['posts'], newData)
-
             onClose()
-        }
+        },
     })
-    
-    async function onSubmit(data) {
-        const userId = 1
 
-        Object.assign(data, {userId: userId})
+    async function onSubmit(data) {
+        const newData = {
+            ...post,
+            title: data.title,
+            body: data.body
+        }
         
-        createPostMutation.mutate(data)
+        editPostMutation.mutate(newData)
     }
     
     return (
         <>
-            <Button size="sm" variant="solid" colorScheme="teal" onClick={onOpen} leftIcon={<MdOutlinePlaylistAdd />}>
-                Create Post
-            </Button>
+            <IconButton size="sm" variant="solid" icon={<MdEditNote />} onClick={onOpen} />
             <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
                 <ModalContent>
                     <form onSubmit={handleSubmit(onSubmit)}>
-                        <ModalHeader>Create New Post</ModalHeader>
+                        <ModalHeader>Edit Post</ModalHeader>
                         <ModalBody>
                             <Stack spacing='5'>
                                 <FormControl isInvalid={errors.title}>
@@ -75,8 +63,8 @@ export default function CreatePost() {
                                     <FormLabel htmlFor="body">Body</FormLabel>
                                     <Textarea id="body" {...register('body', {
                                         required: 'Body is required',
-                                        maxLength: { value: 255, message: 'Max Char is 255'}
-                                    })}/>
+                                        maxLength: { value: 255, message: 'Max Char is 255' }
+                                    })} />
                                     <FormErrorMessage>
                                         {errors.body && errors.body.message}
                                     </FormErrorMessage>
@@ -85,10 +73,10 @@ export default function CreatePost() {
                         </ModalBody>
                         <ModalFooter>
                             <Flex justifyContent='end' gap='3'>
-                                <Button size="sm" colorScheme="gray" leftIcon={<MdClose />} onClick={onClose} isDisabled={createPostMutation.isLoading}>
+                                <Button size="sm" colorScheme="gray" leftIcon={<MdClose />} onClick={onClose} isDisabled={editPostMutation.isLoading}>
                                     Close
                                 </Button>
-                                <Button size="sm" colorScheme="teal" variant="outline" leftIcon={<MdOutlineSave />} isLoading={createPostMutation.isLoading} type="submit">
+                                <Button size="sm" colorScheme="teal" variant="outline" leftIcon={<MdOutlineSave />} isLoading={editPostMutation.isLoading} type="submit">
                                     Save
                                 </Button>
                             </Flex>
@@ -97,5 +85,5 @@ export default function CreatePost() {
                 </ModalContent>
             </Modal>
         </>
-    );
+    )
 }
