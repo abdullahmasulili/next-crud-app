@@ -2,6 +2,29 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
+```bash
+# create new directory
+mkdir next-crud-app
+
+# enter the created directory
+cd next-crud-app
+
+# initialize git
+git init
+
+# add git remote repository
+git remote add origin https://github.com/abdullahmasulili/next-crud-app
+
+# fetch main branch
+git fetch origin main
+
+# pull any updates from main branch
+git pull origin main
+
+# install all dependency
+npm install
+```
+
 First, run the development server:
 
 ```bash
